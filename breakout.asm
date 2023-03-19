@@ -42,7 +42,7 @@ main:
     
     li $t5, 0 # the first position to start writing in pixels
     
-brick_loop: bge $t5, 1280, game_loop #while 0 < 
+brick_loop: bge $t5, 2816, draw_paddle #while 0 < 
     addu $t7, $t4, $t5 #offset display address by t5 and store the offset in t7
     li $t8, 20 # every third pixel drawn needs to be empty 
     divu $t5, $t8 # division for the same
@@ -50,9 +50,15 @@ brick_loop: bge $t5, 1280, game_loop #while 0 <
     #draw the respective colors with alternating black rows
     blt $t5, 256, brick_reds
     blt $t5, 512, fill_black
-    blt $t5, 768, brick_oranges
+    blt $t5, 768, brick_reds1
     blt $t5, 1024, fill_black
-    blt $t5, 1280, brick_greens
+    blt $t5, 1280, brick_oranges
+    blt $t5, 1536, fill_black
+    blt $t5, 1792, brick_oranges1
+    blt $t5, 2048, fill_black
+    blt $t5, 2304, brick_greens
+    blt $t5, 2560, fill_black
+    blt $t5, 2816, brick_greens1
 
 ##FILLING IN ROWS ###
 brick_reds:
@@ -64,9 +70,27 @@ brick_reds:
     addi $t2, $t2, 4 #offset the array address
     j brick_loop
     
+brick_reds1:
+    li $t1 , 0xea2014 #$t1 = red
+    beq $t0, 8, fill_black
+    sw $t1, 0($t7) # set pixel in t7 to red
+    sw $t1, 0($t2) #load the pixel value into the brick array
+    addi $t5, $t5, 4
+    addi $t2, $t2, 4 #offset the array address
+    j brick_loop
+    
 brick_oranges:
     li $t1 , 0xFBB533 #$t3 = orange
-    beq $t0, 8, fill_black
+    beq $t0, 0, fill_black
+    sw $t1, 0($t7) # set pixel in t7 to red
+    sw $t1, 0($t2) #load the pixel value into the brick array
+    addi $t5, $t5, 4
+    addi $t2, $t2, 4 #offset the array address
+    j brick_loop
+    
+brick_oranges1:
+    li $t1 , 0xFBB533 #$t3 = orange
+    beq $t0, 12, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
@@ -75,7 +99,16 @@ brick_oranges:
 
 brick_greens:
     li $t1 , 0x4F6F23 #$t1 = green
-    beq $t0, 0, fill_black
+    beq $t0, 4, fill_black
+    sw $t1, 0($t7) # set pixel in t7 to red
+    sw $t1, 0($t2) #load the pixel value into the brick array
+    addi $t5, $t5, 4
+    addi $t2, $t2, 4 #offset the array address
+    j brick_loop
+    
+brick_greens1:
+    li $t1 , 0x4F6F23 #$t1 = green
+    beq $t0, 16, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
@@ -89,6 +122,15 @@ fill_black:
     addi $t5, $t5, 4
     addi $t2, $t2, 4 #offset the array address
     j brick_loop
+    
+draw_paddle:
+    #drawing in the paddle in blue color
+    li $t1, 0x00ffff #blue
+    addi $t7, $t4, 14452
+    sw $t1, 0($t7)
+    sw $t1, 4($t7)
+    sw $t1, 8($t7)
+    sw $t1, 12($t7)
     
 ##FILLING IN ROWS ENDS###
 
