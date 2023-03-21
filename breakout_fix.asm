@@ -44,14 +44,15 @@ main:
     
 fill_background: #make the entire background black - resetting effectively.
     li $t1, 0x000000 #black
-    bge $t5, 32768, brick_loop
+    beq $t5, 32768, re_init
     addu $t7, $t4, $t5 #offset display address by t5 and store the offset in t7
     sw $t1, 0($t7)
     addi $t5, $t5, 4
     j fill_background
     
+re_init: li $t5, 0 # the first position to start writing in pixels
+
 brick_loop: 
-    li $t5, 0 # the first position to start writing in pixels
     bge $t5, 2816, draw_paddle #while 0 < 
     addu $t7, $t4, $t5 #offset display address by t5 and store the offset in t7
     li $t8, 20 # every third pixel drawn needs to be empty 
@@ -135,8 +136,8 @@ fill_black:
     
 draw_paddle:
     #drawing in the paddle in blue color
-    li $t1, 0x00ffff #cyan
-    addi $t7, $t4, 14456
+    li $t1, 0x00ffff #blue
+    addiu $t7, $t4,31096
     sw $t1, 0($t7)
     sw $t1, 4($t7)
     sw $t1, 8($t7)
@@ -148,34 +149,33 @@ interaction_setup:
     #right side means 1, 1
     li $t1, 0xffffff #white
     #inititally it should just move in diretion 0 1
-    addi $t6, $t4, 14456
-    sw $s0, 0($t6) #position of left side of paddle
-    sw $s1, 8($t6) # position of right side of paddle
-    sw $s2, 4($t6) #position of middle paddle
-    sw $s3, 14200($t4) #position of the ball is 1 row above the middle paddle
-    sw $t1, 14200($t4) #draw the ball
+    addi $t6, $t4, 30844
+    lw $s0, 0($t6) #position of left side of paddle
+    lw $s1, 8($t6) # position of right side of paddle
+    lw $s2, 4($t6) #position of middle paddle
+    lw $s3, 30844($t4) #position of the ball is 1 row above the middle paddle
+    lw $t1, 30844($t4) #draw the ball
     #initial x and y directions
     li $s4, 0 #x-dir
     li $s5, 1 #y-dir
     
     #setup keyboard
-    lw $s7, ADDR_KBRD               # $t0 = base address for keyboard
+    lw $t0, ADDR_KBRD               # $t0 = base address for keyboard
     
  wait_for_keyboard:
     #take keyboard input to begin the game
-    lw $t8, 0($s7)                  # Load first word from keyboard
+    lw $t8, 0($t0)                  # Load first word from keyboard
     beq $t8, 1, move_ball_init      # If first word 1, key is pressed
-    j wait_for_keyboard
-    
-   
-# move_ball_init:
-    # #update the position of the ball:
-    # li $t1, 0x000001 #black
-    # sw $t1, 0($s3) #fill out the current position of the ball
-    # subu $s3, $s3, 256 #move it a row up
-    # li $t1, 0xffffff #white
-    # sw $t1, 0($s3)
+    j wait_for_keyboard    
 
+move_ball_init:
+    #update the position of the ball:
+    li $t1, 0x000000 #black
+    sw $t1, 0($s3) #fill out the current position of the ball
+    subiu $s3, $s3, 256 #move it a row up
+    li $t1, 0xffffff #white
+    sw $t1, 0($s3)
+    
 game_loop:
 	# 1a. Check if key has been pressed
     # 1b. Check which key has been pressed
