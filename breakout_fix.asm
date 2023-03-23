@@ -425,7 +425,7 @@ check_collision_paddle:
     addu $t7, $t4, $s2 #getting the address of the middle paddle
     beq $s2, $t6, may_collide_paddle_middle
     
-    j collision_check_top_wall
+    j collision_check_left_wall
     
 may_collide_paddle_middle:
     neg $s4, $s4
@@ -451,13 +451,6 @@ collision_right_wall:
     j movement_keyboard
     
 collision_left_wall:
-    addu $a0, $s4, $zero
-    li $v0, 1
-    syscall
-    
-    la $a0, print_msg
-    li $v0, 4
-    syscall
     neg $s4, $s4
     j movement_keyboard
 
@@ -477,4 +470,3 @@ move_ball_init:
     addu $t6, $t4, $s3 #get new ball position
     li $t1, 0xffffff #white
     sw $t1, 0($t6)
-    
