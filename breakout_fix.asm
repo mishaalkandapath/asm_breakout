@@ -183,6 +183,9 @@ interaction_setup:
     li $s4, 0 #x-dir
     li $s5, -1 #y-dir
     
+    #resetting in the array:
+    la $t2, bricks
+    
     # #setup keyboard
     lw $t0, ADDR_KBRD               # $t0 = base address for keyboard
     
@@ -217,10 +220,23 @@ game_loop:
     add $t6, $t6, $t7 #t6 stores the new value of pixel
     
     collision_check_above: beq $s5, -1, check_brick_above #check if the ball is below a brick
-    collision_check_below: #beq $s5, 1, check_brick_below #check if the ball is above a brick
-    collision_check_right: #beq $s4, 1, check_brick_right #ball is left of any brick
-    collision_check_left:  #beq $s4, -1, check_brick_left #ball is right of any brick
+    collision_check_below: beq $s5, 1, check_brick_below #check if the ball is above a brick
+    collision_check_right: beq $s4, 1, check_brick_right #ball is left of any brick
+    collision_check_left:  beq $s4, -1, check_brick_left #ball is right of any brick
     collision_check_paddle: beq $s5, 1, check_collision_paddle #check if the ball is going to collide with the paddle
+    collision_check_left_wall: 
+        addi $t7, $zero, 256 #every value on the left wall is divisible by 256
+        divu $t6, $t7
+        mfhi $t7
+        beq $t7, 0, collision_left_wall
+    collision_check_right_wall: 
+        addi $t7, $t6, 4 #every value on the right wall is divisible by 256 if i add a pixel to it
+        addi $t5, $zero, 256
+        divu $t7, $t5
+        mfhi $t7
+        beq $t7, 0, collision_right_wall
+    collision_check_top_wall: 
+        ble $t6, 255, collision_top_wall  #top layer
 
 #if we get here then there are no collisions, we can safely move the ball in specified direction:
 move_ball:
@@ -321,8 +337,10 @@ may_collide_above:
     j collision_check_below
 
 collides_brick_above:
-    li $t1, 0x00ffff 
+    li $t1, 0x000000
     sw $t1, 0($t7)
+    addu $t7, $t4, $t6
+    sw $t1, 0($t7) #load the pixel value onto the screen
     neg $s5, $s5
     j movement_keyboard
  
@@ -330,7 +348,7 @@ check_brick_below:
     #in this case the y direction is -1:
     #$t2 stores the address of the array
     addiu $t7, $t2, 3839 #the final index in the array 
-    blt $t6, $t7, may_collide_below
+    blt $t6, 3839, may_collide_below
     
     j collision_check_right
     
@@ -342,52 +360,58 @@ may_collide_below:
     j collision_check_right
     
 collides_brick_below:
-    li $t1, 0x000000 
+    li $t1, 0x000000
     sw $t1, 0($t7)
+    addu $t7, $t4, $t6
+    sw $t1, 0($t7) #load the pixel value onto the screen
     neg $s5, $s5
     j movement_keyboard
 
-# check_brick_left:
-    # #in this case the x direction is -1:
-    # #$t2 stores the address of the array
-    # addiu $t7, $t2, 3083 #the final index in the array 
-    # blt $t6, $t7, may_collide_left
+check_brick_left:
+    #in this case the x direction is -1:
+    #$t2 stores the address of the array
+    addiu $t7, $t2, 3839 #the final index in the array 
+    blt $t6, 3839, may_collide_left
     
-    # j collision_check_paddle
+    j collision_check_paddle
     
-# may_collide_left:
-    # #the index of where it could collide is in t7
-    # addu $t7, $t2, $t6 #offset the array memory address
-    # lw $t8, 0($t7) #load in the value stored
-    # bne $t8, 0x000000, collides_brick_left
-    # j collision_check_paddle
+may_collide_left:
+    #the index of where it could collide is in t7
+    addu $t7, $t2, $t6 #offset the array memory address
+    lw $t8, 0($t7) #load in the value stored
+    bne $t8, 0x000000, collides_brick_left
+    j collision_check_paddle
     
-# collides_brick_left:
-    # li $t1, 0x000000 
-    # sw $t1, 0($t7)
-    # neg $s4, $s4 
-    # j movement_keyboard
+collides_brick_left:
+    li $t1, 0x000000 
+    sw $t1, 0($t7)
+    addu $t7, $t4, $t6
+    sw $t1, 0($t7) #load the pixel value onto the screen
+    neg $s4, $s4 
+    j movement_keyboard
     
-# check_brick_right:
-    # #in this case the x direction is 1:
-    # #$t2 stores the address of the array
-    # addiu $t7, $t2, 3083 #the final index in the array 
-    # blt $t6, $t7, may_collide_right
+check_brick_right:
+    #in this case the x direction is 1:
+    #$t2 stores the address of the array
+    addiu $t7, $t2, 3839 #the final index in the array 
+    blt $t6, 3839, may_collide_right
     
-    # j collision_check_left
+    j collision_check_left
     
-# may_collide_right:
-    # #the index of where it could collide is in t7
-    # addu $t7, $t2, $t6 #offset the array memory address
-    # lw $t8, 0($t7) #load in the value stored
-    # bne $t8, 0x000000, collides_brick_right
-    # j collision_check_left
+may_collide_right:
+    #the index of where it could collide is in t7
+    addu $t7, $t2, $t6 #offset the array memory address
+    lw $t8, 0($t7) #load in the value stored
+    bne $t8, 0x000000, collides_brick_right
+    j collision_check_left
     
-# collides_brick_right:
-    # li $t1, 0x000000 
-    # sw $t1, 0($t7)
-    # neg $s4, $s4 
-    # j movement_keyboard
+collides_brick_right:
+    li $t1, 0x000000 
+    sw $t1, 0($t7)
+    addu $t7, $t4, $t6
+    sw $t1, 0($t7) #load the pixel value onto the screen
+    neg $s4, $s4 
+    j movement_keyboard
 
 check_collision_paddle:
     #in this case the y direction of the ball is -1 with some x direction
@@ -401,10 +425,9 @@ check_collision_paddle:
     addu $t7, $t4, $s2 #getting the address of the middle paddle
     beq $s2, $t6, may_collide_paddle_middle
     
-    j move_ball 
+    j collision_check_top_wall
     
 may_collide_paddle_middle:
- 
     neg $s4, $s4
     neg $s5, $s5
     j movement_keyboard
@@ -418,7 +441,25 @@ may_collide_paddle_right:
     li $s5, -1
     li $s4, 1
     j movement_keyboard
-
+    
+collision_top_wall:
+    neg $s5, $s5 #negative y direction
+    j movement_keyboard
+    
+collision_right_wall:
+    neg $s4, $s4
+    j movement_keyboard
+    
+collision_left_wall:
+    addu $a0, $s4, $zero
+    li $v0, 1
+    syscall
+    
+    la $a0, print_msg
+    li $v0, 4
+    syscall
+    neg $s4, $s4
+    j movement_keyboard
 
 #5. Go back to 1
 loop_again:    
