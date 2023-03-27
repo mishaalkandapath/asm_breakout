@@ -366,8 +366,16 @@ collides_brick_above:
     li $t1, 0x000000
     sw $t1, 0($t7)
     addu $t7, $t4, $t6
+    addiu $t9, $t6, -4
     addiu $t7, $t7, 4864
     sw $t1, 0($t7) #load the pixel value onto the screen
+    
+    #delete any remaining pixels in the brick
+    addiu $t6, $t6, 4
+    jal delete_brick_right
+    addiu $t6, $t9, 0
+    jal delete_brick_left
+    
     neg $s5, $s5
     j movement_keyboard
  
@@ -391,8 +399,17 @@ collides_brick_below:
     li $t1, 0x000000
     sw $t1, 0($t7)
     addu $t7, $t4, $t6
+    addiu $t9, $t6, -4
     addiu $t7, $t7, 4864
     sw $t1, 0($t7) #load the pixel value onto the screen
+    
+    #delete any remaining pixels in the brick
+    addiu $t6, $t6, 4
+    jal delete_brick_right
+    addiu $t6, $t9, 0
+    jal delete_brick_left
+    
+    
     neg $s5, $s5
     j movement_keyboard
 
@@ -416,8 +433,16 @@ collides_brick_left:
     li $t1, 0x000000 
     sw $t1, 0($t7)
     addu $t7, $t4, $t6
+    addiu $t9, $t6, -4
     addiu $t7, $t7, 4864
     sw $t1, 0($t7) #load the pixel value onto the screen
+    
+    #delete any remaining pixels in the brick
+    addiu $t6, $t6, 4
+    jal delete_brick_right
+    addiu $t6, $t9, 0
+    jal delete_brick_left
+    
     neg $s4, $s4 
     j movement_keyboard
     
@@ -441,10 +466,58 @@ collides_brick_right:
     li $t1, 0x000000 
     sw $t1, 0($t7)
     addu $t7, $t4, $t6
+    addiu $t9, $t6, -4
     addiu $t7, $t7, 4864
     sw $t1, 0($t7) #load the pixel value onto the screen
+    
+    #delete any remaining pixels in the brick
+    addiu $t6, $t6, 4
+    jal delete_brick_right
+    addiu $t6, $t9, 0
+    jal delete_brick_left
+    
     neg $s4, $s4 
     j movement_keyboard
+    
+delete_brick_right:
+    #keep going right from current t6 value , currently storing array index. 
+    #make_sure it doesnt exceed the row:
+    li $t1, 0x000000
+    divu $t7, $t6, 256
+    mfhi $t7
+    beq $t7, 0, end_deleting 
+    addu $t7, $t2, $t6 #offset the array memory address
+    lw $t8, 0($t7) #load in the value stored
+    beq $t8, 0x000000, end_deleting
+    sw $t1, 0($t7) #remove that pixel from the array
+    addiu $t6, $t6, 4864
+    addu $t7, $t4, $t6 #offset the display memory address
+    sw $t1, 0($t7) #remove that pixel from the array
+    subiu $t6, $t6, 4864
+    addi $t6, $t6, 4
+    j delete_brick_right
+    
+delete_brick_left:
+    #keep going right from current t6 value , currently storing array index. 
+    #make_sure it doesnt exceed the row:
+    li $t1, 0x000000
+    addiu $t7, $t6, 4
+    divu $t7, $t6, 256
+    mfhi $t7
+    beq $t7, 0, end_deleting 
+    addu $t7, $t2, $t6 #offset the array memory address
+    lw $t8, 0($t7) #load in the value stored
+    beq $t8, 0x000000, end_deleting
+    sw $t1, 0($t7) #remove that pixel from the array
+    addiu $t6, $t6, 4864
+    addu $t7, $t4, $t6 #offset the display memory address
+    sw $t1, 0($t7) #remove that pixel from the array
+    subiu $t6, $t6, 4864 #change  it back into an array index
+    subiu $t6, $t6, 4
+    j delete_brick_left
+    
+end_deleting:
+    jr $ra
 
 check_collision_paddle:
     #in this case the y direction of the ball is -1 with some x direction
