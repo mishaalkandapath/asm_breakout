@@ -52,34 +52,54 @@ fill_background: #make the entire background black - resetting effectively.
     j fill_background
     
 re_init: li $t5, 0 # the first position to start writing in pixels
+#bricks are drawn after 20 rows of empty space
+make_wall_left:
+    li $t1, 0xffffff #white
+    beq $t5, 32768, right_init
+    addu $t7, $t4, $t5 #offset display address by t5 and store the offset in t7
+    sw $t1, 0($t7) #set the wall to white
+    addiu $t5, $t5, 252
+    addu $t7, $t4, $t5 #offset display address by t5 and store the offset in t7
+    sw $t1, 0($t7) #set the wall to white
+    addiu $t5, $t5, 4
+    j make_wall_left
+    
+right_init: 
+    li $t5, 4864
+
+change_brick_and_paddle_walls:
+    addu $t7, $t4, $zero #offset display address by t5 and store the offset in t7
+    li $t1, 0x00ffff #paddle blue
+    sw $t1, 30976($t7)
+    sw $t1, 31228($t7)
 
 brick_loop: 
-    bge $t5, 3840, draw_paddle #while 0 < 
+    bge $t5, 8704, draw_paddle #while 0 < 
     addu $t7, $t4, $t5 #offset display address by t5 and store the offset in t7
     li $t8, 20 # every third pixel drawn needs to be empty 
     divu $t5, $t8 # division for the same
     mfhi $t0 #get the value in remainder
     #draw the respective colors with alternating black rows
-    blt $t5, 256, brick_reds
-    blt $t5, 512, fill_black
-    blt $t5, 768, brick_reds1
-    blt $t5, 1024, fill_black
-    blt $t5, 1280, brick_oranges
-    blt $t5, 1536, fill_black
-    blt $t5, 1792, brick_oranges1
-    blt $t5, 2048, fill_black
-    blt $t5, 2304, brick_greens
-    blt $t5, 2560, fill_black
-    blt $t5, 2816, brick_greens1
-    blt $t5, 3072, fill_black
-    blt $t5, 3328, brick_yellow
-    blt $t5, 3584, fill_black
-    blt $t5, 3840, brick_yellow1
+    blt $t5, 5120, brick_reds
+    blt $t5, 5376, fill_black
+    blt $t5, 5632, brick_reds1
+    blt $t5, 5888, fill_black
+    blt $t5, 6144, brick_oranges
+    blt $t5, 6400, fill_black
+    blt $t5, 6656, brick_oranges1
+    blt $t5, 6912, fill_black
+    blt $t5, 7168, brick_greens
+    blt $t5, 7424, fill_black
+    blt $t5, 7680, brick_greens1
+    blt $t5, 7936, fill_black
+    blt $t5, 8192, brick_yellow
+    blt $t5, 8448, fill_black
+    blt $t5, 8704, brick_yellow1
 
 ##FILLING IN ROWS ###
 brick_reds:
     li $t1 , 0xea2014 #$t1 = red
-    beq $t0, 16, fill_black
+    beq $t0, 0, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
@@ -88,7 +108,7 @@ brick_reds:
     
 brick_reds1:
     li $t1 , 0xea2014 #$t1 = red
-    beq $t0, 8, fill_black
+    beq $t0, 12, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
@@ -97,7 +117,7 @@ brick_reds1:
     
 brick_oranges:
     li $t1 , 0xFBB533 #$t3 = orange
-    beq $t0, 0, fill_black
+    beq $t0, 4, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
@@ -106,7 +126,7 @@ brick_oranges:
     
 brick_oranges1:
     li $t1 , 0xFBB533 #$t3 = orange
-    beq $t0, 12, fill_black
+    beq $t0, 16, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
@@ -115,7 +135,7 @@ brick_oranges1:
 
 brick_greens:
     li $t1 , 0x4F6F23 #$t1 = green
-    beq $t0, 4, fill_black
+    beq $t0, 8, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
@@ -124,7 +144,7 @@ brick_greens:
     
 brick_greens1:
     li $t1 , 0x4F6F23 #$t1 = green
-    beq $t0, 16, fill_black
+    beq $t0, 0, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
@@ -133,7 +153,7 @@ brick_greens1:
     
 brick_yellow:
     li $t1 , 0xFCEEAF #$t1 = green
-    beq $t0, 8, fill_black
+    beq $t0, 12, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
@@ -142,7 +162,7 @@ brick_yellow:
     
 brick_yellow1:
     li $t1 , 0xFCEEAF #$t1 = green
-    beq $t0, 0, fill_black
+    beq $t0, 4, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
@@ -219,6 +239,9 @@ game_loop:
     mflo $t6
     add $t6, $t6, $t7 #t6 stores the new value of pixel
     
+    #store t6 into the stack pointer or smthn:
+    sw $t6, 0($sp)
+    
     collision_check_above: beq $s5, -1, check_brick_above #check if the ball is below a brick
     collision_check_below: beq $s5, 1, check_brick_below #check if the ball is above a brick
     collision_check_right: beq $s4, 1, check_brick_right #ball is left of any brick
@@ -240,6 +263,8 @@ game_loop:
 
 #if we get here then there are no collisions, we can safely move the ball in specified direction:
 move_ball:
+    #move the real pos of ball back :
+    lw $t6, 0($sp)
     #update the position of the ball:
     li $t1, 0x000000 #black
     addu $t7, $t4, $s3 #get the offset to the display to get to the ball
@@ -325,12 +350,13 @@ check_brick_above:
     #$t2 stores the address of the array
     
     addiu $t7, $t2, 3839 #the final index in the array
-    blt $t6, 3839, may_collide_above
+    blt $t6, 8704, may_collide_above
     
     j collision_check_below
  
 may_collide_above:
      #the index of where it could collide is in t7
+    subiu $t6, $t6, 4864 
     addu $t7, $t2, $t6 #offset the array memory address
     lw $t8, 0($t7) #load in the value stored
     bne $t8, 0x000000, collides_brick_above
@@ -340,6 +366,7 @@ collides_brick_above:
     li $t1, 0x000000
     sw $t1, 0($t7)
     addu $t7, $t4, $t6
+    addiu $t7, $t7, 4864
     sw $t1, 0($t7) #load the pixel value onto the screen
     neg $s5, $s5
     j movement_keyboard
@@ -348,12 +375,13 @@ check_brick_below:
     #in this case the y direction is -1:
     #$t2 stores the address of the array
     addiu $t7, $t2, 3839 #the final index in the array 
-    blt $t6, 3839, may_collide_below
+    blt $t6, 8704, may_collide_below
     
     j collision_check_right
     
 may_collide_below:
     #the index of where it could collide is in t7
+     subiu $t6, $t6, 4864 
     addu $t7, $t2, $t6 #offset the array memory address
     lw $t8, 0($t7) #load in the value stored
     bne $t8, 0x000000, collides_brick_below
@@ -363,6 +391,7 @@ collides_brick_below:
     li $t1, 0x000000
     sw $t1, 0($t7)
     addu $t7, $t4, $t6
+    addiu $t7, $t7, 4864
     sw $t1, 0($t7) #load the pixel value onto the screen
     neg $s5, $s5
     j movement_keyboard
@@ -371,12 +400,13 @@ check_brick_left:
     #in this case the x direction is -1:
     #$t2 stores the address of the array
     addiu $t7, $t2, 3839 #the final index in the array 
-    blt $t6, 3839, may_collide_left
+    blt $t6, 8704, may_collide_left
     
     j collision_check_paddle
     
 may_collide_left:
     #the index of where it could collide is in t7
+     subiu $t6, $t6, 4864 
     addu $t7, $t2, $t6 #offset the array memory address
     lw $t8, 0($t7) #load in the value stored
     bne $t8, 0x000000, collides_brick_left
@@ -386,6 +416,7 @@ collides_brick_left:
     li $t1, 0x000000 
     sw $t1, 0($t7)
     addu $t7, $t4, $t6
+    addiu $t7, $t7, 4864
     sw $t1, 0($t7) #load the pixel value onto the screen
     neg $s4, $s4 
     j movement_keyboard
@@ -394,12 +425,13 @@ check_brick_right:
     #in this case the x direction is 1:
     #$t2 stores the address of the array
     addiu $t7, $t2, 3839 #the final index in the array 
-    blt $t6, 3839, may_collide_right
+    blt $t6, 8704, may_collide_right
     
     j collision_check_left
     
 may_collide_right:
     #the index of where it could collide is in t7
+     subiu $t6, $t6, 4864 
     addu $t7, $t2, $t6 #offset the array memory address
     lw $t8, 0($t7) #load in the value stored
     bne $t8, 0x000000, collides_brick_right
@@ -409,6 +441,7 @@ collides_brick_right:
     li $t1, 0x000000 
     sw $t1, 0($t7)
     addu $t7, $t4, $t6
+    addiu $t7, $t7, 4864
     sw $t1, 0($t7) #load the pixel value onto the screen
     neg $s4, $s4 
     j movement_keyboard
