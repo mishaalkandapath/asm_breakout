@@ -180,10 +180,15 @@ fill_black:
 draw_paddle:
     #drawing in the paddle in blue color
     li $t1, 0x00ffff #blue
-    addiu $t7, $t4,31096
+    li $t9, 0 #loop variable
+    addiu $t7, $t4,31088
     sw $t1, 0($t7)
     sw $t1, 4($t7)
     sw $t1, 8($t7)
+    sw $t1, 12($t7)
+    sw $t1, 16($t7)
+    sw $t1, 20($t7)
+    sw $t1, 24($t7)
 ##FILLING IN ROWS ENDS###
 
 interaction_setup:
@@ -193,9 +198,7 @@ interaction_setup:
     li $t1, 0xffffff #white
     #inititally it should just move in diretion 0 1
     
-    li $s0, 31096 #position of left side of paddle
-    li $s1, 31104 # position of right side of paddle
-    li $s2, 31100 #position of middle paddle
+    li $s0, 31088 #position of left side of paddle
     #draw and store the ball
     li $s3, 30844 #position of the ball is 1 row above the middle paddle
     sw $t1, 30844($t4) #draw the ball
@@ -292,58 +295,62 @@ receive_keyboard_in:
     
 move_paddle_left:
      beq $s0, 30976, movement_keyboard # cant move left no more
+     addu $t7, $s0, $t4
      #move the paddle sections left by one
      
      #erase paddle
      li $t1, 0x000000 #black
-     addu $t7, $s1, $t4 #get the offset to the display to get to the right paddle
-     sw $t1, 0($t7) #fill out the right paddle
-     addu $t7, $s2, $t4 #get the offset to the display to get to the middle paddle
-     sw $t1, 0($t7) #fill out the left paddle
-     addu $t7, $s0, $t4 #get the offset to the display to get to the left paddle
-     sw $t1, 0($t7) #fill out the left paddle
+     sw $t1, 0($t7)
+     sw $t1, 4($t7)
+     sw $t1, 8($t7)
+     sw $t1, 12($t7)
+     sw $t1, 16($t7)
+     sw $t1, 20($t7)
+     sw $t1, 24($t7)
      
-     #draw in the paddle
+     #redraw the paddle:
+     subiu $s0, $s0, 8
+     addu $t7, $s0, $t4 #new padlde position
      li $t1, 0x00ffff #cyan
-     subiu $s0, $s0, 4
-     subiu $s1, $s1, 4
-     subiu $s2, $s2, 4
-     addu $t7, $s1, $t4 #get the offset to the display to get to the right paddle
-     sw $t1, 0($t7) #fill out the right paddle
-     addu $t7, $s2, $t4 #get the offset to the display to get to the middle paddle
-     sw $t1, 0($t7) #fill out the left paddle
-     addu $t7, $s0, $t4 #get the offset to the display to get to the left paddle
-     sw $t1, 0($t7) #fill out the left paddle
+     sw $t1, 0($t7)
+     sw $t1, 4($t7)
+     sw $t1, 8($t7)
+     sw $t1, 12($t7)
+     sw $t1, 16($t7)
+     sw $t1, 20($t7)
+     sw $t1, 24($t7)
      
      j loop_again
-     
  
  move_paddle_right:
-     beq $s1, 31228, movement_keyboard # cant move right no more
-     #move the paddle sections right by one
+     beq $s0, 31200, movement_keyboard # cant move right no more
+     addu $t7, $s0, $t4
+     #move the paddle sections left by one
      
      #erase paddle
      li $t1, 0x000000 #black
-     addu $t7, $s1, $t4 #get the offset to the display to get to the right paddle
-     sw $t1, 0($t7) #fill out the right paddle
-     addu $t7, $s2, $t4 #get the offset to the display to get to the middle paddle
-     sw $t1, 0($t7) #fill out the left paddle
-     addu $t7, $s0, $t4 #get the offset to the display to get to the left paddle
-     sw $t1, 0($t7) #fill out the left paddle
+     sw $t1, 0($t7)
+     sw $t1, 4($t7)
+     sw $t1, 8($t7)
+     sw $t1, 12($t7)
+     sw $t1, 16($t7)
+     sw $t1, 20($t7)
+     sw $t1, 24($t7)
      
-     #draw in the paddle
+     #redraw the paddle:
+     addiu $s0, $s0, 8
+     addu $t7, $s0, $t4 #new padlde position
      li $t1, 0x00ffff #cyan
-     addiu $s0, $s0, 4
-     addiu $s1, $s1, 4
-     addiu $s2, $s2, 4
-     addu $t7, $s1, $t4 #get the offset to the display to get to the right paddle
-     sw $t1, 0($t7) #fill out the right paddle
-     addu $t7, $s2, $t4 #get the offset to the display to get to the middle paddle
-     sw $t1, 0($t7) #fill out the left paddle
-     addu $t7, $s0, $t4 #get the offset to the display to get to the left paddle
-     sw $t1, 0($t7) #fill out the left paddle
+     sw $t1, 0($t7)
+     sw $t1, 4($t7)
+     sw $t1, 8($t7)
+     sw $t1, 12($t7)
+     sw $t1, 16($t7)
+     sw $t1, 20($t7)
+     sw $t1, 24($t7)
      
      j loop_again
+     
     
 check_brick_above:
     #in this case the y direction is -1:
@@ -523,15 +530,14 @@ check_collision_paddle:
     #in this case the y direction of the ball is -1 with some x direction
     #s0 - s2 store offsets in memory of paddle
     addu $t7, $t4, $s0 #getting the address of the left paddle
-    beq $s0, $t6, may_collide_paddle_left
     
-    addu $t7, $t4, $s1 #getting the address of the right paddle
-    beq $s1, $t6, may_collide_paddle_right
-    
-    addu $t7, $t4, $s2 #getting the address of the middle paddle
-    beq $s2, $t6, may_collide_paddle_middle
-    
-    j collision_check_left_wall
+    bgt $s0, $t6, collision_check_left_wall
+    addiu $t9, $s0, 24
+    blt $t9, $t6, collision_check_left_wall
+    addiu $t9, $s0, 12
+    blt $t6, $t9, may_collide_paddle_left
+    beq $t6, $t9, may_collide_paddle_middle
+    j may_collide_paddle_right
     
 may_collide_paddle_middle:
     neg $s4, $s4
