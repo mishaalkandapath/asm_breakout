@@ -263,6 +263,8 @@ game_loop:
         beq $t7, 0, collision_right_wall
     collision_check_top_wall: 
         ble $t6, 255, collision_top_wall  #top layer
+    #check if the game should be ended:
+    bgt $t6, 32768, respond_to_Q #quit 
 
 #if we get here then there are no collisions, we can safely move the ball in specified direction:
 move_ball:
@@ -288,8 +290,10 @@ movement_keyboard:
 receive_keyboard_in:
     lw $a0, 4($t0)                  # Load second word from keyboard
    
+    beq $a0, 0x71, respond_to_Q     # Check if the key q was pressed
     beq $a0, 0x61, move_paddle_left     # Check if left was pressed
     beq $a0, 0x64, move_paddle_right #similarly for right
+    
     
     j loop_again
     
@@ -572,6 +576,11 @@ loop_again:
     li $v0, 32
     syscall
     j game_loop
+
+respond_to_Q:
+	li $v0, 10                      # Quit gracefully
+	syscall
+
 
 move_ball_init:
     #update the position of the ball:
