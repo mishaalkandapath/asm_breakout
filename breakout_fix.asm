@@ -254,6 +254,7 @@ game_loop:
     collision_check_left:  beq $s4, -1, check_brick_left #ball is right of any brick
     collision_check_paddle: beq $s5, 1, check_collision_paddle #check if the ball is going to collide with the paddle
     collision_check_left_wall: 
+        lw $t6, 0($sp)
         addi $t7, $zero, 256 #every value on the left wall is divisible by 256
         divu $t6, $t7
         mfhi $t7
@@ -265,7 +266,7 @@ game_loop:
         mfhi $t7
         beq $t7, 0, collision_right_wall
     collision_check_top_wall: 
-        ble $t6, 255, collision_top_wall  #top layer
+        ble $t6, 4864, collision_top_wall  #top layer
     #check if the game should be ended:
     bgt $t6, 32768, another_life #check if you have another life 
     
