@@ -42,6 +42,7 @@ main:
     la $t2, bricks #array of bricks
     
     li $t5, 0 # the first position to start writing in pixels
+    li $s1, 0
     
 fill_background: #make the entire background black - resetting effectively.
     li $t1, 0x000000 #black
@@ -116,7 +117,7 @@ brick_reds1:
     j brick_loop
     
 brick_oranges:
-    li $t1 , 0xFBB533 #$t3 = orange
+    li $t1 , 0xFBB533 #$t1 = orange
     beq $t0, 4, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
@@ -125,7 +126,7 @@ brick_oranges:
     j brick_loop
     
 brick_oranges1:
-    li $t1 , 0xFBB533 #$t3 = orange
+    li $t1 , 0xFBB533 #$t1 = orange
     beq $t0, 16, fill_black
     sw $t1, 0($t7) # set pixel in t7 to red
     sw $t1, 0($t2) #load the pixel value into the brick array
@@ -193,8 +194,9 @@ draw_paddle:
 
 interaction_setup:
     #after all the brick setup we have, every register except t2 and t4 ready for use for other operations
-    #if the ball hits the left side of the paddle, it shud go in direction: -1 1
-    #right side means 1, 1
+    
+    #set up the current  life:
+    addiu $s1, $s1, 1
     li $t1, 0xffffff #white
     #inititally it should just move in diretion 0 1
     
@@ -264,7 +266,7 @@ game_loop:
     collision_check_top_wall: 
         ble $t6, 255, collision_top_wall  #top layer
     #check if the game should be ended:
-    bgt $t6, 32768, respond_to_Q #quit 
+    bgt $t6, 32768, another_life #check if you have another life 
 
 #if we get here then there are no collisions, we can safely move the ball in specified direction:
 move_ball:
@@ -576,6 +578,21 @@ loop_again:
     li $v0, 32
     syscall
     j game_loop
+    
+another_life:
+    #ready to redraw the paddle:
+    beq $s1, 3, respond_to_Q #quit, maxed out on lives:
+    li $t1, 0x000000
+    addu $t7, $t4, $s0
+    sw $t1, 0($t7)
+    sw $t1, 4($t7)
+    sw $t1, 8($t7)
+    sw $t1, 12($t7)
+    sw $t1, 16($t7)
+    sw $t1, 20($t7)
+    sw $t1, 24($t7)
+    
+    j draw_paddle
 
 respond_to_Q:
 	li $v0, 10                      # Quit gracefully
