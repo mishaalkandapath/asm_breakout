@@ -43,6 +43,7 @@ main:
     
     li $t5, 0 # the first position to start writing in pixels
     li $s1, 0
+    li $s2, 0 #the number of bricks broken
     
 fill_background: #make the entire background black - resetting effectively.
     li $t1, 0x000000 #black
@@ -267,6 +268,53 @@ game_loop:
         ble $t6, 255, collision_top_wall  #top layer
     #check if the game should be ended:
     bgt $t6, 32768, another_life #check if you have another life 
+    
+score0:
+    bgt $s2, 9, score1
+    jal draw0
+    j move_ball
+
+score1:
+    bgt $s2, 19, score2
+    jal draw1
+    j move_ball
+    
+score2:
+    bgt $s2, 29, score3
+    jal draw2
+    j move_ball
+    
+score3:
+    bgt $s2, 39, score4
+    jal draw3
+    j move_ball
+    
+score4:
+    bgt $s2, 49, score5
+    jal draw4
+    j move_ball
+    
+score5:
+    bgt $s2, 59, score6
+    jal draw5
+    j move_ball
+    
+score6:
+    bgt $s2, 69, score7
+    jal draw6
+    j move_ball
+    
+score7:
+    bgt $s2, 79, score8
+    jal draw7
+    
+score8:
+    bgt $s2, 89, score9
+    jal draw8
+    
+score9:
+    bgt $s2, 99, move_ball
+    jal draw9
 
 #if we get here then there are no collisions, we can safely move the ball in specified direction:
 move_ball:
@@ -390,6 +438,7 @@ collides_brick_above:
     jal delete_brick_left
     
     neg $s5, $s5
+    addiu $s2, $s2, 1
     j movement_keyboard
  
 check_brick_below:
@@ -420,6 +469,7 @@ collides_brick_below:
     addiu $t6, $t6, 4
     jal delete_brick_right
     addiu $t6, $t9, 0
+    addiu $s2, $s2, 1
     jal delete_brick_left
     
     
@@ -457,6 +507,7 @@ collides_brick_left:
     jal delete_brick_left
     
     neg $s4, $s4 
+    addiu $s2, $s2, 1
     j movement_keyboard
     
 check_brick_right:
@@ -490,6 +541,7 @@ collides_brick_right:
     jal delete_brick_left
     
     neg $s4, $s4 
+    addiu $s2, $s2, 1
     j movement_keyboard
     
 delete_brick_right:
@@ -597,6 +649,286 @@ another_life:
 respond_to_Q:
 	li $v0, 10                      # Quit gracefully
 	syscall
+	
+#section drawing scores for scoreboard:
+#scores are from 0-10, incrementing every 10 bricks, last one requires some extra brick - yea difficulty
+#scores are drawn in the 6th row, at column index 5 (i.e the 6th pixel on the 10th row forms the left most)
+erase_all:
+    #offset the display by 9 rows and 6 columsn = 2310
+    li $t1, 0x000000
+    addiu $t7, $t4, 1304
+    sw $t1, 0($t7)
+    sw $t1, 4($t7)
+    sw $t1, 8($t7)
+    sw $t1, 12($t7)
+    sw $t1, 16($t7)
+    sw $t1, 20($t7)
+    sw $t1, 24($t7)
+    addiu $t7, $t4, 1328
+    sw $t1, 0($t7)
+    sw $t1, 256($t7)
+    sw $t1, 512($t7)
+    sw $t1, 768($t7)
+    sw $t1, 1024($t7)
+    sw $t1, 1280($t7)
+    sw $t1, 1536($t7)
+    addiu $t7, $t4, 2864
+    sw $t1, 0($t7)
+    sw $t1, 256($t7)
+    sw $t1, 512($t7)
+    sw $t1, 768($t7)
+    sw $t1, 1024($t7)
+    sw $t1, 1280($t7)
+    sw $t1, 1536($t7)
+    addiu $t7, $t4, 2840
+    sw $t1, 0($t7)
+    sw $t1, 256($t7)
+    sw $t1, 512($t7)
+    sw $t1, 768($t7)
+    sw $t1, 1024($t7)
+    sw $t1, 1280($t7)
+    sw $t1, 1536($t7)
+    addiu $t7, $t4, 4376
+    sw $t1, 0($t7)
+    sw $t1, 4($t7)
+    sw $t1, 8($t7)
+    sw $t1, 12($t7)
+    sw $t1, 16($t7)
+    sw $t1, 20($t7)
+    sw $t1, 24($t7)
+    addiu $t7, $t4, 1304
+    sw $t1, 0($t7)
+    sw $t1, 256($t7)
+    sw $t1, 512($t7)
+    sw $t1, 768($t7)
+    sw $t1, 1024($t7)
+    sw $t1, 1280($t7)
+    sw $t1, 1536($t7)
+    addiu $t7, $t4, 2840
+    sw $t1, 0($t7)
+    sw $t1, 4($t7)
+    sw $t1, 8($t7)
+    sw $t1, 12($t7)
+    sw $t1, 16($t7)
+    sw $t1, 20($t7)
+    sw $t1, 24($t7)
+    jr $ra
+
+draw_segment_0:
+    #offset the display by 9 rows and 6 columsn = 2310
+    li $t1, 0xffffff
+    addiu $t7, $t4, 1304
+    sw $t1, 0($t7)
+    sw $t1, 4($t7)
+    sw $t1, 8($t7)
+    sw $t1, 12($t7)
+    sw $t1, 16($t7)
+    sw $t1, 20($t7)
+    sw $t1, 24($t7)
+    jr $ra
+    
+draw_segment_1:
+    li $t1, 0xffffff
+    addiu $t7, $t4, 1328
+    sw $t1, 0($t7)
+    sw $t1, 256($t7)
+    sw $t1, 512($t7)
+    sw $t1, 768($t7)
+    sw $t1, 1024($t7)
+    sw $t1, 1280($t7)
+    sw $t1, 1536($t7)
+    jr $ra
+    
+draw_segment_2:
+    li $t1, 0xffffff
+    addiu $t7, $t4, 2864
+    sw $t1, 0($t7)
+    sw $t1, 256($t7)
+    sw $t1, 512($t7)
+    sw $t1, 768($t7)
+    sw $t1, 1024($t7)
+    sw $t1, 1280($t7)
+    sw $t1, 1536($t7)
+    jr $ra
+    
+draw_segment_4:
+    li $t1, 0xffffff
+    addiu $t7, $t4, 2840
+    sw $t1, 0($t7)
+    sw $t1, 256($t7)
+    sw $t1, 512($t7)
+    sw $t1, 768($t7)
+    sw $t1, 1024($t7)
+    sw $t1, 1280($t7)
+    sw $t1, 1536($t7)
+    jr $ra
+
+draw_segment_3:
+    li $t1, 0xffffff
+    addiu $t7, $t4, 4376
+    sw $t1, 0($t7)
+    sw $t1, 4($t7)
+    sw $t1, 8($t7)
+    sw $t1, 12($t7)
+    sw $t1, 16($t7)
+    sw $t1, 20($t7)
+    sw $t1, 24($t7)
+    jr $ra
+
+draw_segment_5:
+    li $t1, 0xffffff
+    addiu $t7, $t4, 1304
+    sw $t1, 0($t7)
+    sw $t1, 256($t7)
+    sw $t1, 512($t7)
+    sw $t1, 768($t7)
+    sw $t1, 1024($t7)
+    sw $t1, 1280($t7)
+    sw $t1, 1536($t7)
+    jr $ra
+    
+draw_segment_6:
+    li $t1, 0xffffff
+    addiu $t7, $t4, 2840
+    sw $t1, 0($t7)
+    sw $t1, 4($t7)
+    sw $t1, 8($t7)
+    sw $t1, 12($t7)
+    sw $t1, 16($t7)
+    sw $t1, 20($t7)
+    sw $t1, 24($t7)
+    jr $ra
+draw0:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_0
+    jal draw_segment_1
+    jal draw_segment_2
+    jal draw_segment_3
+    jal draw_segment_4
+    jal draw_segment_5
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4 #move the stack pointer back down
+    jr $ra
+
+draw1:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_1
+    jal draw_segment_2
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4 #move the stack pointer back down
+    jr $ra
+
+draw2:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_0
+    jal draw_segment_1
+    jal draw_segment_6
+    jal draw_segment_4
+    jal draw_segment_3
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4 #move the stack pointer back down
+    jr $ra
+
+draw3:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_0
+    jal draw_segment_3
+    jal draw_segment_1
+    jal draw_segment_2
+    jal draw_segment_6
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4 #move the stack pointer back down
+    jr $ra
+    
+draw4:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_1
+    jal draw_segment_6
+    jal draw_segment_5
+    jal draw_segment_2
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4 #move the stack pointer back down
+    jr $ra
+
+draw5:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_0
+    jal draw_segment_5
+    jal draw_segment_6
+    jal draw_segment_2
+    jal draw_segment_3
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4 #move the stack pointer back down
+    jr $ra
+    
+draw6:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_6
+    jal draw_segment_2
+    jal draw_segment_3
+    jal draw_segment_4
+    jal draw_segment_0
+    jal draw_segment_5
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4 #move the stack pointer back down
+    jr $ra
+
+draw7:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_0
+    jal draw_segment_1
+    jal draw_segment_2
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4 #move the stack pointer back down
+    jr $ra
+
+draw8:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_0
+    jal draw_segment_1
+    jal draw_segment_2
+    jal draw_segment_3
+    jal draw_segment_4
+    jal draw_segment_5
+    jal draw_segment_6
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4 #move the stack pointer back down
+    jr $ra
+    
+draw9:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_0
+    jal draw_segment_1
+    jal draw_segment_2
+    jal draw_segment_5
+    jal draw_segment_6
+    lw $ra, 0($sp)
+    addiu $sp, $sp, 4 #move the stack pointer back down
+    jr $ra
+    
+draw10:
+    #draw a crown:
+    
 
 
 move_ball_init:
