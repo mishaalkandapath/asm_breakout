@@ -781,7 +781,7 @@ erase_all:
 draw_segment_0:
     #offset the display by 9 rows and 6 columsn = 2310
     li $t1, 0xffffff
-    addiu $t7, $t4, 1304
+    addu $t7, $t4, $a0
     sw $t1, 0($t7)
     sw $t1, 4($t7)
     sw $t1, 8($t7)
@@ -793,7 +793,7 @@ draw_segment_0:
     
 draw_segment_1:
     li $t1, 0xffffff
-    addiu $t7, $t4, 1328
+    addu $t7, $t4, $a0
     sw $t1, 0($t7)
     sw $t1, 256($t7)
     sw $t1, 512($t7)
@@ -805,7 +805,7 @@ draw_segment_1:
     
 draw_segment_2:
     li $t1, 0xffffff
-    addiu $t7, $t4, 2864
+    addu $t7, $t4, $a0
     sw $t1, 0($t7)
     sw $t1, 256($t7)
     sw $t1, 512($t7)
@@ -817,7 +817,7 @@ draw_segment_2:
     
 draw_segment_4:
     li $t1, 0xffffff
-    addiu $t7, $t4, 2840
+    addu $t7, $t4, $a0
     sw $t1, 0($t7)
     sw $t1, 256($t7)
     sw $t1, 512($t7)
@@ -829,7 +829,7 @@ draw_segment_4:
 
 draw_segment_3:
     li $t1, 0xffffff
-    addiu $t7, $t4, 4376
+    addu $t7, $t4, $a0
     sw $t1, 0($t7)
     sw $t1, 4($t7)
     sw $t1, 8($t7)
@@ -841,7 +841,7 @@ draw_segment_3:
 
 draw_segment_5:
     li $t1, 0xffffff
-    addiu $t7, $t4, 1304
+    addu $t7, $t4, $a0
     sw $t1, 0($t7)
     sw $t1, 256($t7)
     sw $t1, 512($t7)
@@ -853,7 +853,7 @@ draw_segment_5:
     
 draw_segment_6:
     li $t1, 0xffffff
-    addiu $t7, $t4, 2840
+    addu $t7, $t4, $a0
     sw $t1, 0($t7)
     sw $t1, 4($t7)
     sw $t1, 8($t7)
@@ -866,11 +866,17 @@ draw0:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+    lw $a0, 1304
     jal draw_segment_0
+    lw $a0, 1328
     jal draw_segment_1
+    lw $a0, 2864
     jal draw_segment_2
+    lw $a0, 2840
     jal draw_segment_3
+    lw $a0, 4376
     jal draw_segment_4
+    lw $a0, 1304
     jal draw_segment_5
     lw $ra, 0($sp)
     addiu $sp, $sp, 4 #move the stack pointer back down
@@ -880,7 +886,9 @@ draw1:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+    lw $a0, 1328
     jal draw_segment_1
+    lw $a0, 2864
     jal draw_segment_2
     lw $ra, 0($sp)
     addiu $sp, $sp, 4 #move the stack pointer back down
@@ -890,11 +898,16 @@ draw2:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+    lw $a0, 1304
     jal draw_segment_0
+    lw $a0, 1328
     jal draw_segment_1
+    lw $a0, 2840
     jal draw_segment_6
-    jal draw_segment_4
+    lw $a0, 2840
     jal draw_segment_3
+    lw $a0, 4376
+    jal draw_segment_4
     lw $ra, 0($sp)
     addiu $sp, $sp, 4 #move the stack pointer back down
     jr $ra
@@ -903,10 +916,15 @@ draw3:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+     lw $a0, 1304
     jal draw_segment_0
+    lw $a0, 2840
     jal draw_segment_3
+    lw $a0, 1328
     jal draw_segment_1
+    lw $a0, 2864
     jal draw_segment_2
+    lw $a0, 2840
     jal draw_segment_6
     lw $ra, 0($sp)
     addiu $sp, $sp, 4 #move the stack pointer back down
@@ -916,9 +934,13 @@ draw4:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+    lw $a0, 1328
     jal draw_segment_1
+    lw $a0, 2840
     jal draw_segment_6
+    lw $a0, 1304
     jal draw_segment_5
+    lw $a0, 2864
     jal draw_segment_2
     lw $ra, 0($sp)
     addiu $sp, $sp, 4 #move the stack pointer back down
@@ -928,10 +950,15 @@ draw5:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+    lw $a0, 1304
     jal draw_segment_0
+    lw $a0, 1304
     jal draw_segment_5
+    lw $a0, 2840
     jal draw_segment_6
+    lw $a0, 2864
     jal draw_segment_2
+     lw $a0, 2840
     jal draw_segment_3
     lw $ra, 0($sp)
     addiu $sp, $sp, 4 #move the stack pointer back down
@@ -941,11 +968,17 @@ draw6:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+    lw $a0, 2840
     jal draw_segment_6
+    lw $a0, 2864
     jal draw_segment_2
+    lw $a0, 2840
     jal draw_segment_3
+    lw $a0, 4376
     jal draw_segment_4
+    lw $a0, 1304
     jal draw_segment_0
+    lw $a0, 1304
     jal draw_segment_5
     lw $ra, 0($sp)
     addiu $sp, $sp, 4 #move the stack pointer back down
@@ -955,8 +988,11 @@ draw7:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+    lw $a0, 1304
     jal draw_segment_0
+    lw $a0, 1328
     jal draw_segment_1
+    lw $a0, 2864
     jal draw_segment_2
     lw $ra, 0($sp)
     addiu $sp, $sp, 4 #move the stack pointer back down
@@ -966,12 +1002,19 @@ draw8:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+    lw $a0, 1304
     jal draw_segment_0
+    lw $a0, 1328
     jal draw_segment_1
+    lw $a0, 2864
     jal draw_segment_2
+     lw $a0, 2840
     jal draw_segment_3
+    lw $a0, 4376
     jal draw_segment_4
+    lw $a0, 1304
     jal draw_segment_5
+    lw $a0, 2840
     jal draw_segment_6
     lw $ra, 0($sp)
     addiu $sp, $sp, 4 #move the stack pointer back down
@@ -981,10 +1024,15 @@ draw9:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+    lw $a0, 1304
     jal draw_segment_0
+    lw $a0, 1328
     jal draw_segment_1
+    lw $a0, 2864
     jal draw_segment_2
+    lw $a0, 1304
     jal draw_segment_5
+    lw $a0, 2840
     jal draw_segment_6
     lw $ra, 0($sp)
     addiu $sp, $sp, 4 #move the stack pointer back down
@@ -995,16 +1043,24 @@ draw10:
     subiu $sp, $sp, 4 #move the stack pointer up
     sw $ra, 0($sp)
     jal erase_all
+    lw $a0, 1328
     jal draw_segment_1
+    lw $a0, 2864
     jal draw_segment_2
     #thats the end of 1
     li $a0, 2868 #new start location for segment 0
     jal draw_segment_0
+    li $a0, 2892 #new start location for segment 1
     jal draw_segment_1
+    li $a0, 4428
     jal draw_segment_2
+    li $a0, 5940
     jal draw_segment_3
+    li $a0, 4404 
     jal draw_segment_4
+    li $a0, 2868 
     jal draw_segment_5
+    j respond_to_Q #end the game
     
     
     
