@@ -3,10 +3,10 @@
 #
 # Student 1: Mishaal Kandapath, 1007978137
 ######################## Bitmap Display Configuration ########################
-# - Unit width in pixels:       TODO
-# - Unit height in pixels:      TODO
-# - Display width in pixels:    TODO
-# - Display height in pixels:   TODO
+# - Unit width in pixels:       64
+# - Unit height in pixels:      128
+# - Display width in pixels:    1
+# - Display height in pixels:   1
 # - Base Address for Display:   0x10008000 ($gp)
 ##############################################################################
 
@@ -24,6 +24,11 @@ ADDR_KBRD:
 bricks: .space 3840
 
 print_msg: .asciiz "\n\0"
+
+#sound configs
+beep: .byte 72
+duration: .byte 100
+volume: .byte 127
 ##############################################################################
 # Mutable Data
 ##############################################################################
@@ -44,6 +49,7 @@ main:
     li $t5, 0 # the first position to start writing in pixels
     li $s1, 0
     li $s2, 0 #the number of bricks broken
+    lw $s7, ADDR_KBRD
     
 fill_background: #make the entire background black - resetting effectively.
     li $t1, 0x000000 #black
@@ -106,6 +112,9 @@ brick_reds:
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
     addi $t2, $t2, 4 #offset the array address
+    li $a0, 10
+    li $v0, 32
+    syscall
     j brick_loop
     
 brick_reds1:
@@ -115,6 +124,9 @@ brick_reds1:
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
     addi $t2, $t2, 4 #offset the array address
+    li $a0, 5
+    li $v0, 32
+    syscall
     j brick_loop
     
 brick_oranges:
@@ -124,6 +136,9 @@ brick_oranges:
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
     addi $t2, $t2, 4 #offset the array address
+    li $a0, 5
+    li $v0, 32
+    syscall
     j brick_loop
     
 brick_oranges1:
@@ -133,6 +148,9 @@ brick_oranges1:
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
     addi $t2, $t2, 4 #offset the array address
+    li $a0, 5
+    li $v0, 32
+    syscall
     j brick_loop
 
 brick_greens:
@@ -142,6 +160,9 @@ brick_greens:
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
     addi $t2, $t2, 4 #offset the array address
+    li $a0, 5
+    li $v0, 32
+    syscall
     j brick_loop
     
 brick_greens1:
@@ -151,6 +172,9 @@ brick_greens1:
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
     addi $t2, $t2, 4 #offset the array address
+    li $a0, 5
+    li $v0, 32
+    syscall
     j brick_loop
     
 brick_yellow:
@@ -160,6 +184,9 @@ brick_yellow:
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
     addi $t2, $t2, 4 #offset the array address
+    li $a0, 5
+    li $v0, 32
+    syscall
     j brick_loop
     
 brick_yellow1:
@@ -169,6 +196,9 @@ brick_yellow1:
     sw $t1, 0($t2) #load the pixel value into the brick array
     addi $t5, $t5, 4
     addi $t2, $t2, 4 #offset the array address
+    li $a0, 5
+    li $v0, 32
+    syscall
     j brick_loop
     
 fill_black:
@@ -185,12 +215,33 @@ draw_paddle:
     li $t9, 0 #loop variable
     addiu $t7, $t4,31088
     sw $t1, 0($t7)
+    li $a0, 5
+    li $v0, 32
+    syscall
     sw $t1, 4($t7)
+    li $a0, 5
+    li $v0, 32
+    syscall
     sw $t1, 8($t7)
+    li $a0, 5
+    li $v0, 32
+    syscall
     sw $t1, 12($t7)
+    li $a0, 5
+    li $v0, 32
+    syscall
     sw $t1, 16($t7)
+    li $a0, 5
+    li $v0, 32
+    syscall
     sw $t1, 20($t7)
+    li $a0, 5
+    li $v0, 32
+    syscall
     sw $t1, 24($t7)
+    li $a0, 5
+    li $v0, 32
+    syscall
 ##FILLING IN ROWS ENDS###
 
 interaction_setup:
@@ -212,12 +263,12 @@ interaction_setup:
     #resetting in the array:
     la $t2, bricks
     
-    # #setup keyboard
-    lw $t0, ADDR_KBRD               # $t0 = base address for keyboard
+    # # #setup keyboard
+    # lw $s, ADDR_KBRD               # $t0 = base address for keyboard
     
  wait_for_keyboard_to_begin:
     #take keyboard input to begin the game
-    lw $t8, 0($t0)                  # Load first word from keyboard
+    lw $t8, 0($s7)                  # Load first word from keyboard
     beq $t8, 1, game_loop     # If first word 1, key is pressed
     j wait_for_keyboard_to_begin    
     
@@ -308,14 +359,19 @@ score6:
 score7:
     bgt $s2, 79, score8
     jal draw7
+    j move_ball
     
 score8:
     bgt $s2, 89, score9
     jal draw8
+    j move_ball
     
 score9:
     bgt $s2, 99, move_ball
     jal draw9
+    
+score10:
+    jal draw10
 
 #if we get here then there are no collisions, we can safely move the ball in specified direction:
 move_ball:
@@ -334,13 +390,14 @@ move_ball:
 #can also check for keyboard inputs to move the paddle:
 movement_keyboard:
     #take keyboard input to move the paddle
-    lw $t8, 0($t0)                  # Load first word from keyboard
+    lw $t8, 0($s7)                  # Load first word from keyboard
     beq $t8, 1, receive_keyboard_in     # If first word 1, key is pressed
     j loop_again  
     
 receive_keyboard_in:
-    lw $a0, 4($t0)                  # Load second word from keyboard
+    lw $a0, 4($s7)                  # Load second word from keyboard
    
+    beq $a0, 'p', wait_for_keyboard_to_begin   
     beq $a0, 0x71, respond_to_Q     # Check if the key q was pressed
     beq $a0, 0x61, move_paddle_left     # Check if left was pressed
     beq $a0, 0x64, move_paddle_right #similarly for right
@@ -648,6 +705,12 @@ another_life:
     j draw_paddle
 
 respond_to_Q:
+    li $v0,31
+    la $a0,beep
+    
+    la $a1,duration
+    lw $a1, 0($a1)
+    
 	li $v0, 10                      # Quit gracefully
 	syscall
 	
@@ -929,9 +992,23 @@ draw9:
     
 draw10:
     #draw a crown:
+    subiu $sp, $sp, 4 #move the stack pointer up
+    sw $ra, 0($sp)
+    jal erase_all
+    jal draw_segment_1
+    jal draw_segment_2
+    #thats the end of 1
+    li $a0, 2868 #new start location for segment 0
+    jal draw_segment_0
+    jal draw_segment_1
+    jal draw_segment_2
+    jal draw_segment_3
+    jal draw_segment_4
+    jal draw_segment_5
     
-
-
+    
+    
+    
 move_ball_init:
     #update the position of the ball:
     li $t1, 0x000000 #black
@@ -941,3 +1018,4 @@ move_ball_init:
     addu $t6, $t4, $s3 #get new ball position
     li $t1, 0xffffff #white
     sw $t1, 0($t6)
+    sw $t1, -1796($t7)
